@@ -366,3 +366,73 @@ tail*, and when it points at a **fake `zend_array`** (controlled `pDestructor`),
 object-hijack target as `rop.py`, reached through the OOM bucket instead of the
 backtrace. The "double-free" framing is therefore the *wrong* lens: the real
 task is exactly the bin-28 slot placement of §8.6.
+
+### 8.8 The two-insert structure (gdb: `zend_hash_str_update_ind` trace)
+
+Each `a[<large>][c]=v` field registers the `<large>` key into **two** arrays via
+`zend_symtable_str_update_ind` (the "symtable" indirect-value path):
+
+```
+ADD ht=0x..b150 nNumUsed=43   (insert #1 -> $_POST["a"])
+ADD ht=0x..b0e0 nNumUsed=44   (insert #2 -> a second array)
+ADD ht=0x..b150 nNumUsed=44
+ADD ht=0x..b0e0 nNumUsed=45
+ADD ht=0x..b150 nNumUsed=45
+ADD ht=0x..b0e0 nNumUsed=46   <- OOM here (2nd insert's key-copy)
+```
+
+- `ht=0x..b150` = **`$_POST["a"]`** (verified: it is the array destroyed second in
+  `php_request_shutdown`, right after `$_POST`, `nUsed=46`).
+- `ht=0x..b0e0` = a **second array** (a symtable/indirect copy, `nUsed=47`).
+
+The OOM always lands on the **second** insert (`b0e0`, index 46) because the
+first insert's 80 KB key-copy succeeds and the second exhausts the limit. The
+unwritten bucket is therefore in `b0e0`.
+
+### 8.9 The walk only reaches `$_POST["a"]` (b150), not b0e0
+
+`zend_array_destroy` / `zend_hash_destroy` trace at shutdown shows only `b150`
+is walked; `b0e0` is **not** destroyed (it is the symbol-table-style copy that
+fast-shutdown discards). So the naive "unwritten bucket is walked" model
+(attack-surface §4) is wrong for this trigger: the corrupted bucket is in a
+table that is never walked.
+
+### 8.10 The pad reaches b0e0's arData, not b150's
+
+The `zend_hash_do_resize` sweep (bin-28 head) shows `b0e0` resizes first and
+reuses the pad's freed `'P'` block; `b150` resizes second and reuses a zeroed
+slot. Combined with 8.9 this is the exact mismatch:
+
+| table | arData (pad?) | walked? | has OOM bucket? |
+|-------|---------------|---------|-----------------|
+| b0e0  | `'P'` (pad)   | **no**  | yes (idx 46)    |
+| b150  | zeros         | **yes** | no              |
+
+### 8.11 Path forward
+
+Make the OOM land on the **first** insert (`b150`) by spending ~80 KB more
+memory before the OOM field (pad or extra field), so the first key-copy fails
+and `b150` (walked) holds the unwritten bucket; and place **two** pads (or a
+pad sized/positioned for both resizes) so `b150`'s arData also gets the
+controlled bytes. Then `i_zval_ptr_dtor` on `b150`'s controlled bucket reaches
+the fake `pDestructor`/`free_obj`.
+
+### 8.12 Confirmed: pad size selects the OOM table
+
+`zend_hash_str_update_ind` trace with a leading memory-shift pad
+(`pad=<Q*N>` before the bracket-key fields):
+
+| pad length | last ADD before OOM (the OOM bucket) |
+|-----------|--------------------------------------|
+| 0          | `b0e0` idx 46 (non-walked)          |
+| 40000      | `b150` idx 45 (**walked**)          |
+| 80000      | `b0e0` idx 45 (non-walked)          |
+| 120000     | `b150` idx 44 (**walked**)          |
+
+So a ~40 KB pad shifts the OOM from the second insert (`b0e0`, discarded) onto
+the **first** insert (`b150` = `$_POST["a"]`, walked at shutdown). This makes
+the unwritten bucket reachable by `zend_array_destroy`. Remaining: (a) also
+make `b150`'s 32->64 resize reuse the controlled bin-28 block (it currently
+reuses a zeroed slot, while `b0e0`'s earlier resize takes the pad — so use two
+pads, or a pad positioned between the two resizes), and (b) place the fake
+`pDestructor`/`free_obj` bytes at the unwritten bucket's offset.
