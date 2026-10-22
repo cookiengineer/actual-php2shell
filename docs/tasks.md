@@ -41,6 +41,7 @@ Legend:
 | T-11 | `cve-2026-109619-stale-state` | Arbitrary call -> file read | - | - | - | RCE-first; depends on T-10 |
 | T-12 | `cve-2026-109619-stale-state` | `exploit.py read <file>` end-to-end | partial | - | - | `uaf` wired; `read` not yet |
 | T-13 | `negative-control` | Patched rebuild not exploitable | done | work | work | `CONTROL PASSED` (5/5 requests survived) |
+| T-14 | `cve-2026-109619-info-leak` | Info-leak + ASLR bypass (addresses) | done | prim | - | gdb/`setarch -R` measured heap/libphp/libc + backtrace H/D addresses; over-HTTP read needs session consumer or grooming (`docs/info-leak.md`) |
 
 ## Current status
 
