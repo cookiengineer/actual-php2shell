@@ -436,3 +436,40 @@ make `b150`'s 32->64 resize reuse the controlled bin-28 block (it currently
 reuses a zeroed slot, while `b0e0`'s earlier resize takes the pad — so use two
 pads, or a pad positioned between the two resizes), and (b) place the fake
 `pDestructor`/`free_obj` bytes at the unwritten bucket's offset.
+
+### 8.13 The pad slot-reuse blocker (b150's resize)
+
+Two pads placed before the resizes do not help: `add_post_var`'s
+`estrndup(A)` -> `ZVAL_STRINGL_FAST(B, copy)` -> `efree(A)` order means the
+*next* field's `A` reuses the just-freed slot. Measured bin-28 free/alloc:
+
+```
+EMALLOC 2537 (pad1 A -> slot1)  EFREE slot1
+EMALLOC 2537 (pad2 A -> slot1 REUSE)  EFREE slot1
+RESIZE64 b0e0 -> pops slot1 (pad2 'Q')
+RESIZE64 b150 -> pops slot4 (zeros)     # B blocks (slot2,slot3) are live
+```
+
+So there is always exactly **one** freed bin-28 block (the pads' `A` share a
+slot), consumed by `b0e0`'s (first) resize; `b150`'s (second) resize always
+gets a zeroed slot. Getting a controlled block into `b150` needs a *second
+distinct* freed bin-28 block between the two resizes — e.g. a field whose value
+is rejected by `sapi_module.input_filter` (so `A` is freed with no `B` copy), or
+the multipart path, or making the two resizes land on different fields so a pad
+fits between them.
+
+### 8.14 The resizes are at consecutive inserts (INS#65/#66)
+
+Field-marker trace shows `b0e0` resizes at insert #65 and `b150` at insert #66
+(back-to-back: `b0e0` is 1 key ahead of `b150`, so they cross the 32-key
+boundary on adjacent fields). A pad's `estrndup(A)` is freed at a field
+boundary that is either before both resizes (padpos 30-32 -> `b0e0` takes it) or
+after both (padpos 33 -> neither takes it). There is no field boundary *between*
+the two resizes, so a single pad cannot be placed to reach `b150`. Combined with
+the `A`-reuses-slot behavior (§8.13), `b150`'s resize consistently gets a zeroed
+slot. Also: the pad's `B` copy is not bin-28 (no `_emalloc(2560)` seen), so the
+duplicate-key "dtor the old value" trick cannot free a bin-28 block either.
+
+Open paths (unchanged): (a) a field whose value `sapi_module.input_filter`
+rejects (frees `A` with no `B`), (b) the multipart value path, (c) making the
+two resizes land >1 field apart so a pad fits between them.
