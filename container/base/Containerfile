@@ -1,0 +1,99 @@
+# Shared base image: Apache 2.4 + PHP built from a vendored tarball as mod_php.
+#
+# Parameterized by PHP version so both the vulnerable (8.5.11) and patched
+# (8.5.12) targets share one build recipe. Per-case containers layer their own
+# vhost/config on top.
+#
+# Build from the repo root (so the vendored tarball is in the context):
+#   podman build -f container/base/Containerfile \
+#       -t php-rce-base:8.5.11 .                       # vulnerable
+#   podman build -f container/base/Containerfile \
+#       --build-arg PHP_VERSION=8.5.12 \
+#       --build-arg PHP_TARBALL=patched-versions/php-8.5.12.tar.xz \
+#       -t php-rce-base:8.5.12 .                       # patched
+
+ARG PHP_VERSION=8.5.11
+
+FROM debian:bookworm-slim
+
+ARG PHP_VERSION
+ARG PHP_TARBALL=affected-versions/php-${PHP_VERSION}.tar.xz
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PHP_VERSION=${PHP_VERSION} \
+    PHP_PREFIX=/usr/local/php8
+
+# --- 1. Build dependencies + Apache -------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        apache2 \
+        apache2-dev \
+        build-essential \
+        autoconf \
+        bison \
+        re2c \
+        pkg-config \
+        libxml2-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        zlib1g-dev \
+        libonig-dev \
+        libcurl4-openssl-dev \
+        libicu-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsodium-dev \
+        libargon2-dev \
+        ca-certificates \
+        file \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- 2. Copy vendored PHP source and extract ---------------------------------------
+WORKDIR /usr/src
+COPY ${PHP_TARBALL} /usr/src/php.tar.xz
+RUN tar -xJf php.tar.xz && mv php-${PHP_VERSION} php-src && rm php.tar.xz
+
+# --- 3. Configure + build + install PHP as Apache module ---------------------------
+WORKDIR /usr/src/php-src
+# Release build (no ZEND_DEBUG) but WITH debug symbols for gdb/primitive work.
+# -O2 keeps the production allocator/layout representative.
+RUN ./configure \
+        --prefix=${PHP_PREFIX} \
+        --with-apxs2=/usr/bin/apxs2 \
+        --with-config-file-path=/etc/php8 \
+        --with-config-file-scan-dir=/etc/php8/conf.d \
+        --disable-cgi \
+        --disable-phpdbg \
+        --enable-session \
+        --enable-mbstring \
+        --enable-filter \
+        --enable-opcache \
+        --with-zlib \
+        --with-openssl \
+        --with-libxml \
+        CFLAGS="-O2 -g -fno-omit-frame-pointer" \
+    && make -j"$(nproc)" \
+    && make install \
+    && ln -s ${PHP_PREFIX}/bin/php /usr/local/bin/php
+
+# --- 4. Base config (case layers may override the vhost) ---------------------------
+COPY container/base/php.ini     /etc/php8/php.ini
+COPY container/base/php.conf    /etc/apache2/conf-available/php.conf
+COPY container/base/mpm.conf    /etc/apache2/conf-available/mpm.conf
+
+RUN a2enmod php \
+    && a2enconf php \
+    && a2enconf mpm \
+    && a2dismod mpm_event 2>/dev/null || true \
+    && a2enmod mpm_prefork \
+    && mkdir -p /etc/php8/conf.d
+
+# --- 5. Application (application-independent target) -------------------------------
+COPY container/base/app/index.php /var/www/html/index.php
+COPY container/base/app/fatal.php /var/www/html/fatal.php
+RUN chown -R www-data:www-data /var/www/html
+
+# Marker files the PoCs read remotely.
+RUN echo "PHP_RCE_POC_SECRET_${PHP_VERSION}" > /secret.txt && chmod 644 /secret.txt
+
+EXPOSE 80
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]

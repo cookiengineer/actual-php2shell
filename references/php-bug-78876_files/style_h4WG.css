@@ -1,0 +1,705 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    background-color: white;
+    color: black;
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 90%;
+}
+
+img {
+    border:0 none;
+}
+
+table.head,
+table.middle,
+table.foot {
+    font-size: 100%; /* make IE look normal */
+    width: 100%;
+    border: 0px;
+}
+
+td.content {
+    width: 100%;
+    vertical-align: top;
+    padding: 1em 0.5em 0.3em 0.5em;
+}
+
+
+/* ========= Header ========= */
+
+td.head-logo {
+    background-color: #5b69a6;
+    width: 120px;
+    text-align: left;
+}
+
+td.head-menu {
+    background-color: #5b69a6;
+    height: 1px;
+    padding-right: 0.5em;
+    padding-bottom: 0.1em;
+    text-align: right;
+    vertical-align: bottom;
+}
+
+td.head-search {
+    color: #FFFFFF;
+    background-color: #9999cc;
+    border-top: 1px solid #000066;
+    border-bottom: 1px solid #000066;
+    padding-right: 0.5em;
+    text-align: right;
+}
+
+p.head-search {
+    font-size: 80%;
+    margin-top: 0.1em;
+    margin-bottom: 0.1em;
+}
+
+p.head-search input,
+p.head-search select {
+    font-size: 100%;
+}
+
+td.head-menu {
+    color: #000;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+td.head-menu a {
+    color: #FFF;
+    font-weight: normal;
+}
+
+td.head-menu a:link,
+td.head-menu a:hover,
+td.head-menu a:visited {
+    text-decoration: none;
+}
+
+/* ========= Footer ========= */
+
+td.foot-bar {
+    color: #000000;
+    background-color: #5b69a6;
+    border-top: 1px solid #000066;
+    border-bottom: 1px solid #000066;
+    text-align: right;
+    vertical-align: bottom;
+    padding-right: 0.3em;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+td.foot-copy {
+    background-color: #CCCCCC;
+    vertical-align: top;
+    padding: 0.3em;
+}
+
+td.foot-source {
+    background-color: #CCCCCC;
+    vertical-align: top;
+    text-align: right;
+    padding: 0.3em;
+}
+
+
+/* ========= Forms ========= */
+
+table.form-holder {
+    background-color: #FFFFFF;
+    width: auto;
+}
+
+/* Labels on the left side of form and table rows */
+th.form-label_left {
+    padding: 3px;
+    text-align: left;
+    vertical-align: top;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: #5b69a6;
+    width: 25%;
+}
+
+td.form-input {
+    padding: 3px;
+    text-align: left;
+    vertical-align: top;
+    background-color: #e8e8e8;
+}
+
+td.form-input_center {
+    padding: 3px;
+    text-align: center;
+    vertical-align: middle;
+    background-color: #e8e8e8;
+}
+
+td.form-input input,
+td.form-input_center input {
+    font-size: 90%;
+}
+
+p.cell_note {
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+    font-weight: normal;
+    font-size: 95%;
+}
+
+input {
+    font-family: verdana,arial,helvetica,sans-serif;
+}
+
+select {
+    resize: both;
+    vertical-align:top;
+}
+
+textarea {
+    font-family: "andale mono", "monotype.com", "courier new", monospace;
+}
+
+input.small, select.small {
+    font-size: 75%;
+}
+
+textarea.small {
+    font-size: 75%;
+}
+
+form {
+    margin-bottom: 0;
+}
+
+/* === User Submission Responses === */
+
+div.errors,
+div.warnings,
+div.explain,
+div.success
+div.tags {
+    margin: 4px;
+    padding: 6px;
+    clear: both;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+div.errors {
+    border: 1px dashed #660000;
+    background: #fee;
+    color: #660000;
+}
+
+div.warnings {
+    border: 1px dashed #ff8c00;
+    background: #ffa;
+    color: #ff8c00;
+}
+
+div.tags {
+    border: 1px dashed #ff8c00;
+    background: #ffa;
+    color: #ff8c00;
+    width: 500px;
+    margin-left : 100px;
+}
+
+div.explain {
+    border: 1px dashed #000066;
+    color: #000066;
+}
+
+div.success {
+    border: 1px dashed #000066;
+    background-color: #CCFF99;
+    color: #000066;
+    padding:10px;
+}
+
+div.errors ul,
+div.warnings ul,
+div.explain ul,
+div.success ul {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+/* ========= Statistics ========= */
+
+.bug_bg0, .e {
+    background-color: #DDDDDD;
+    font-size: 85%;
+    text-align: center;
+}
+.bug_bg1, .v {
+    background-color: #EEEEEE;
+    font-size: 85%;
+    text-align: center;
+}
+.bug_head, .h {
+    background-color: #aabbcc;
+    color: #000000;
+    font-size: 80%;
+    font-weight: bold;
+    text-align: right;
+    padding: 0em .2em .2em .2em;
+}
+tr.bug_header th {
+    background-color: #aabbcc;
+    color: #000000;
+    font-size: 80%;
+    font-weight: bold;
+    text-align: center;
+    padding: 0em .2em .2em .2em;
+}
+
+a.bug_stats {
+    color: #000000;
+}
+a.bug_stats_choosen {
+    color: #FFFF00;
+}
+
+.bug_bg_selected {
+    background-color: yellow;
+}
+.bug_bg_selected a {
+    color: #006600;
+}
+
+.stats-table tr:hover td {
+    background-color: #aabbcc;
+}
+
+.bugstatrecent table {
+    display:inline-block;
+    vertical-align:top;
+    margin-right:1em;
+    margin-top:1em;
+}
+/* ========= Other ========= */
+
+a:link {
+    color: #000066;
+}
+
+a:visited {
+    color: #003;
+}
+
+a:hover {
+    color: #000033;
+}
+
+th.others {
+    color: #006600;
+    text-align: left;
+}
+
+td.ulcell {
+    vertical-align: top;
+}
+
+em {
+    font-weight: bold;
+    font-style: italic;
+}
+
+hr {
+    border: 0px;
+    height: 1px;
+    background-color: #ccc;
+}
+
+code, pre {
+    font-family: Consolas, Inconsolata, "Liberation Mono", monospace;
+    font-size: 13px;
+}
+
+pre {
+    line-height: 1.4;
+}
+
+h1 {
+    font-size: 140%;
+    font-weight: bold;
+    color: #000066;
+    margin-top: 0em;
+}
+
+h2 {
+    font-size: 125%;
+    font-weight: bold;
+    color: #000066;
+    border-bottom: 1px solid #000;
+}
+
+h3 {
+    font-size: 110%;
+    font-weight: bold;
+    color: #000066;
+}
+
+h4 {
+    font-size: 100%;
+    font-weight: bold;
+    color: #000066;
+}
+
+small {
+    font-size: 85%;
+}
+
+a.small {
+    font-size: 75%;
+    text-decoration: none;
+}
+
+.indent {
+    margin-left: 20px;
+}
+
+.accesskey {
+    text-decoration: underline;
+}
+
+ul {
+    margin-top: 0em;
+}
+/* STYLES FOR THE BUG SYSTEM */
+
+div.clear {
+    clear:both;
+}
+
+td.content {
+    font-size: 1em;
+}
+
+td.content table {
+    font-size: 100%; /* make IE look normal */
+}
+
+.headerbottom {
+    background: #9999cc;
+}
+
+.note, .changeset {
+    width:65em;
+    margin-left: 10px;
+    white-space:pre-wrap;
+    font-size: 13px;
+}
+.lusersearch .note {
+    width:100%;
+}
+.log_note {
+    font-family:monospace;
+    font-size:medium;
+}
+
+.changeset {
+    background-color:#eee;
+    white-space:normal;
+    padding:5px;
+}
+
+.changeset .added {
+    display:block;
+    color: #1aa100;
+}
+
+.changeset .removed {
+    display:block;
+    color: #de0019;
+}
+
+input.small, select.small {
+    font-size: 0.75em;
+}
+
+textarea.small {
+    font-size: 0.75em;
+}
+
+form#comment,
+form#update,
+form#vote,
+div.comment {
+    clear: both;
+  padding: 15px 0;
+}
+
+#comment table {
+  padding-top: 15px;
+}
+
+table.lusersearch td {
+    font-size: 0.75em;
+}
+
+table.lusersearch tr {
+    vertical-align: top;
+}
+
+div.controls {
+    clear: both;
+    width: 100%;
+}
+
+div.controls span {
+    display: block;
+    float: left;
+    border: 1px solid #000;
+    border-top: 0 none;
+    font-weight: bold;
+    background: #ddddff;
+    padding: 4px 8px;
+    margin-left: 10px;
+}
+
+div.comments span {
+    cursor:pointer;
+    font-weight:normal;
+}
+
+div#comments_view {
+    padding-top:10px;
+}
+
+div.controls .active {
+    cursor:auto;
+    position: relative;
+    top: -2px;
+    background: #ffffff;
+    padding-top: 6px;
+}
+
+div.controls a {
+    text-decoration: none;
+}
+
+div.controls a:hover {
+    text-decoration: underline;
+}
+
+td#summary {
+    font-weight: bold;
+}
+div.details {
+    margin:5px;
+}
+th.details {
+    vertical-align: top;
+    text-align: right;
+}
+th.results {
+    background-color: #aaaaaa;
+    text-align: left;
+}
+table#details td {
+    vertical-align: top;
+}
+
+div#bugheader {
+    border-bottom: 2px solid #666666;
+    width: 100%;
+}
+
+div#bugheader table#details th {
+    text-align: right;
+    color: #666666;
+}
+div#bugheader table#details th#number {
+    color: #000066;
+    font-size: larger;
+}
+div#bugheader table#details td#summary {
+    font-weight: bold;
+    vertical-align:middle;
+}
+
+.diffheader {
+    background: #EEEE00;
+}
+.newdiff {
+    background: #FF0000;
+}
+.olddiff {
+    background: #AAAAAA;
+    text-decoration: line-through;
+}
+
+form#vote {
+    font-size: smaller;
+}
+form#vote div.sect {
+    float: left;
+}
+form#vote fieldset {
+    border: 1px solid #000000;
+}
+form#vote div#submit {
+    margin-top: 24px;
+    margin-left: 10px;
+    text-align: center;
+}
+
+form#asearch th {
+    text-align: left;
+    font-weight: bold;
+}
+
+form#asearch table#primary {
+    font-size: 100%; /* make IE look normal */
+    background: #eee;
+    padding: 4px;
+}
+table#votes {
+    background-color:#eee;
+    margin:0 0 0 50px;
+}
+/* === Search === */
+
+td.search-prev_next {
+    background-color: #cccccc;
+    text-align: center;
+    padding-bottom: 0.4em;
+}
+
+td.search-prev_next table {
+    font-size: 100%; /* make IE look normal */
+}
+
+td.search-prev {
+    text-align: left;
+    width: 33%;
+}
+
+td.search-showing {
+    text-align: center;
+    width: 34%;
+}
+
+td.search-next {
+    text-align: right;
+    width: 33%;
+}
+
+input[id^="direction"] + label,
+input[id^="boolean"] + label {
+    padding-right: 1em;
+}
+
+.Asn {
+    background-color: #bbaaff;
+}
+.Ana {
+    background-color: #99bbaa;
+}
+.Nab {
+    background-color: #aaaaaa;
+}
+.Csd {
+    background-color: #aaffbb;
+}
+.Ctl {
+    background-color: #ff0000;
+}
+.Dup {
+    background-color: #bbbbbb;
+}
+.Fbk {
+    background-color: #bbeeff;
+}
+.Fre {
+    background-color: #aaaaaa;
+}
+.NoF {
+    background-color: #bbffcc;
+}
+.Opn {
+    background-color: #ffbbaa;
+}
+.ReO {
+    background-color: #ffaabb;
+}
+.Sus {
+    background-color: #ffccbb;
+}
+.Ver {
+    background-color: #99bbaa;
+}
+.Wfx {
+    background-color: #aaaaaa;
+}
+.Tbd {
+    background-color: #cdb26e;
+}
+.Sec {
+    background-color: #B5C7CD;
+}
+
+/* {{{ Stolen from https://www.devbridge.com/sourcery/components/jquery-autocomplete/ */
+.autocomplete-w1 {
+    background: url(../images/shadow.png) no-repeat bottom right;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    margin: 10px 0 0 6px;
+    /* IE6 fix: */
+    _background:none;
+    _margin:1px 0 0 0;
+}
+.autocomplete {
+    border: 1px solid #999;
+    background: #FFF;
+    cursor: default;
+    text-align: left;
+    max-height: 350px;
+    overflow: auto;
+    margin: -6px 6px 6px -6px;
+    /* IE6 specific: */
+    _height:350px;
+    _margin:0;
+    _overflow-x:hidden;
+}
+.autocomplete .selected {
+    background:#F0F0F0;
+}
+.autocomplete div {
+    padding: 2px 5px;
+    white-space: nowrap;
+}
+.autocomplete strong {
+    font-weight: normal;
+    color: #3399FF;
+}
+
+/* }}} */
+
+/* === Admin === */
+
+td.tbl-row-message {
+    text-align: left;
+}
+
+/* menu */
+a.active {
+    font-weight: bold;
+    color: black;
+    text-decoration: none;
+}
+
+/* phpinfo() */
+div.center {
+    margin: 0px auto;
+    width: 80%;
+}

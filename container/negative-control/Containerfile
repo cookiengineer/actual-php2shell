@@ -1,0 +1,10 @@
+# Negative control: PATCHED PHP 8.5.12 with the SAME configuration as the
+# CVE-2026-109619 stale-state target. Running the exact same exploit here must
+# NOT corrupt the heap (no crash, no file read), proving the PoC exploits the
+# vulnerability rather than a misconfiguration.
+#
+#   podman build -f container/negative-control/Containerfile -t php-rce-control:8.5.12 .
+
+FROM php-rce-base:8.5.12
+
+COPY container/negative-control/000-default.conf /etc/apache2/sites-available/000-default.conf
