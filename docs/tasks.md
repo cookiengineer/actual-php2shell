@@ -38,7 +38,7 @@ Legend:
 | T-08 | `cve-2026-109619-stale-state` | Heap groom: control freed `zend_array` | - | - | - | shared technique for both CVEs; needs allocator layout under gdb |
 | T-09 | `cve-2026-109619-stale-state` | Info-leak: fake `zend_string` read | - | - | - | scaffold in `leak.py` |
 | T-10 | `cve-2026-109619-stale-state` | ASLR bypass: leak heap+libc+PIE | - | - | - | depends on T-09 |
-| T-11 | `cve-2026-109619-stale-state` | Arbitrary call -> file read | - | - | - | RCE-first; depends on T-10 |
+| T-11 | `cve-2026-109618-oom` | Arbitrary call -> file read | done | work | work | RCE achieved: OOM unwritten bucket -> `free_obj` hijack -> `system("cat /etc/passwd")` (ASLR-off; `rce.py`) |
 | T-12 | `cve-2026-109619-stale-state` | `exploit.py read <file>` end-to-end | partial | - | - | `uaf` wired; `read` not yet |
 | T-13 | `negative-control` | Patched rebuild not exploitable | done | work | work | `CONTROL PASSED` (5/5 requests survived) |
 | T-14 | `cve-2026-109619-info-leak` | Info-leak + ASLR bypass (addresses) | done | prim | - | gdb/`setarch -R` measured heap/libphp/libc + backtrace H/D addresses; over-HTTP read needs session consumer or grooming (`docs/info-leak.md`) |
@@ -50,6 +50,10 @@ Legend:
     deterministic worker crash (`zend_mm_heap corrupted` -> SIGABRT).
   - `negative-control`: identical sequence against patched 8.5.12 survives,
     proving the PoC exploits the vulnerability, not a misconfiguration.
+  - `cve-2026-109618-oom`: **RCE achieved (ASLR-off)** — OOM leaves an unwritten
+    bucket in `$_POST["a"]`; `free_obj` object-handler hijack -> ROP ->
+    `system("cat /etc/passwd > /var/www/html/leak.txt")` -> `GET /leak.txt`
+    returns the file (`rce.py`, see `docs/heap-feng-shui.md` §8.16).
 - **Primitive confirmed (verified):**
   - `cve-2026-109618-oom`: OOM lands on the corrupting allocation — the hash
     key `zend_string_init()` inside `_zend_hash_str_add_or_update_i()` after

