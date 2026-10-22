@@ -130,6 +130,25 @@ before the bucket space is fully populated), the shutdown destruction path
 will iterate attacker-controlled `arData` and call an attacker-influenced
 `pDestructor` — an arbitrary indirect call with an attacker-controlled argument.
 
+The precise corruption point is the key-string allocation in
+`_zend_hash_str_add_or_update_i()` (`Zend/zend_hash.c:960`):
+
+```
+add_to_hash:
+    idx = ht->nNumUsed++;                       // (1) bumped FIRST
+    ht->nNumOfElements++;                       // (2) bumped
+    p = ht->arData + idx;
+    p->key = key = zend_string_init(str, len, ...);   // (3) OOM -> zend_bailout
+```
+
+An OOM at (3) longjmps out after (1)/(2), leaving the last bucket's `key`/`val`
+unwritten. Shutdown then walks that bucket; a zeroed bucket is skipped
+(`IS_UNDEF`), but a bucket reused from attacker-controlled memory yields a
+garbage `pDestructor`/`key` → arbitrary call. Verified by
+`exploits/cve-2026-109618-oom/`: the OOM lands on this exact allocation (see
+the fatal's "tried to allocate <key size>" bytes). Making the garbage non-zero
+is the same heap-grooming technique as the stale-state case (T-08).
+
 This is the code-execution primitive we target for file read.
 
 ## 5. Key source references (PHP 8.5.11)

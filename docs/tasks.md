@@ -33,9 +33,9 @@ Legend:
 | T-03 | — | Shared base `container/base/Containerfile` | done | n/a | n/a | parameterized (vuln 8.5.11 / patched 8.5.12) |
 | T-04 | — | Build base images; verify PHP + mod_php | done | n/a | n/a | `php -v`=8.5.11/8.5.12 |
 | T-05 | — | Restructure into per-case containers + exploits | done | n/a | n/a | 3 standalone cases |
-| T-06 | `cve-2026-109618-oom` | OOM corruption trigger | done | wip | - | OOM reaches limit cleanly; corruption (global-write) trigger not yet pinned |
+| T-06 | `cve-2026-109618-oom` | OOM corruption trigger | done | prim | - | OOM reaches the corrupting allocation (`zend_string_init` after `nNumUsed++`); crash needs bucket grooming |
 | T-07 | `cve-2026-109619-stale-state` | Confirm stale-backtrace UAF crash | done | work | work | `run.sh uaf` -> `zend_mm_heap corrupted` -> SIGABRT |
-| T-08 | `cve-2026-109619-stale-state` | Heap groom: control freed `zend_array` | - | - | - | needs allocator layout under gdb |
+| T-08 | `cve-2026-109619-stale-state` | Heap groom: control freed `zend_array` | - | - | - | shared technique for both CVEs; needs allocator layout under gdb |
 | T-09 | `cve-2026-109619-stale-state` | Info-leak: fake `zend_string` read | - | - | - | scaffold in `leak.py` |
 | T-10 | `cve-2026-109619-stale-state` | ASLR bypass: leak heap+libc+PIE | - | - | - | depends on T-09 |
 | T-11 | `cve-2026-109619-stale-state` | Arbitrary call -> file read | - | - | - | RCE-first; depends on T-10 |
@@ -44,13 +44,29 @@ Legend:
 
 ## Current status
 
-- **E2E=work (confirmed):**
+- **E2E=work (verified):**
   - `cve-2026-109619-stale-state`: stale fatal-backtrace use-after-free ->
     deterministic worker crash (`zend_mm_heap corrupted` -> SIGABRT).
   - `negative-control`: identical sequence against patched 8.5.12 survives,
     proving the PoC exploits the vulnerability, not a misconfiguration.
-- **In progress:** `cve-2026-109618-oom` corruption trigger (T-06), and the
-  stale-state grooming/leak/RCE stages (T-08..T-11).
+- **Primitive confirmed (verified):**
+  - `cve-2026-109618-oom`: OOM lands on the corrupting allocation — the hash
+    key `zend_string_init()` inside `_zend_hash_str_add_or_update_i()` after
+    `nNumUsed++` — leaving the last bucket unwritten.
+- **Deep analysis complete (see `docs/memory-layout.md`):**
+  - Exact backtrace object layout (packed array: H=56B header, D=1024B packed
+    zvals), the `zend_objects_store_del` indirect call site (rdi=object,
+    rdx=handlers), an NX-safe stack pivot (`jump_fcontext+0x30`), and a
+    complete ROP chain (`pop rdi; ret` + `system`) with measured addresses.
+  - `exploits/cve-2026-109619-stale-state/rop.py` implements the payload
+    generator.
+- **Remaining (not yet verified):** the heap-feng-shui grooming that places the
+  ROP payload into the dangling target. The two analyzed consumers either
+  double-free the intact header (INI diagnostic -> crash, no control) or
+  reallocate H as the autoglobal array (second fatal -> harmless). The intended
+  path is the double-free of a backtrace *argument string* (controlled by the
+  producer's fatal-error args) to place a controlled chunk on the Zend MM free
+  list twice. Tracked as T-08..T-11.
 
 ## End-to-end proof
 

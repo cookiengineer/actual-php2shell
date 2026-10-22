@@ -90,6 +90,7 @@ RUN a2enmod php \
 # --- 5. Application (application-independent target) -------------------------------
 COPY container/base/app/index.php /var/www/html/index.php
 COPY container/base/app/fatal.php /var/www/html/fatal.php
+COPY container/base/app/producer.php /var/www/html/producer.php
 RUN chown -R www-data:www-data /var/www/html
 
 # Marker files the PoCs read remotely.
