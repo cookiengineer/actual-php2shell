@@ -175,3 +175,194 @@ ret              0x7ffff7cfc7e6
 _efree           0x7ffff4a6ff80
 executor_globals 0x7ffff5b40fc0  (last_fatal_error_backtrace @ +0x1b0)
 ```
+
+## 7. H4 corrected model (gdb-measured, supersedes §5.3 / handover §6)
+
+Measured with `exploits/cve-2026-109619-stale-state/trace.py` + `trace.sh`
+(committed), attaching gdb to the prefork worker and tracing
+`php_request_startup/shutdown`, `zend_error_zstr_at`, `zend_mm_shutdown`,
+`zend_mm_alloc_small_slow`, `zend_fetch_debug_backtrace`, `_efree`, and a
+hardware watchpoint on the backtrace zval's type byte.
+
+### 7.1 The second-fatal consumer DOES NOT EXIST
+
+`zend_activate()` calls `init_executor()` on every request
+(`Zend/zend.c:1324`), and `init_executor()` does
+`ZVAL_UNDEF(&EG(last_fatal_error_backtrace))` (`Zend/zend_execute_API.c:139`).
+
+Watchpoint proof (consumer request):
+
+```
+REQUEST_STARTUP backtrace_type=7      # stale backtrace still present
+WATCH_BT_WRITE type_now=0 func=init_executor   # cleared here
+ERROR_ZSTR_AT type=8192 ... type=UNDEF         # trigger_error deprecation sees UNDEF
+```
+
+So by the time the script runs (the "second-fatal" consumer), the backtrace is
+already UNDEF; its `zval_ptr_dtor` is a no-op. The handover §6 / §5.3
+"second-fatal consumer" was a **misidentified consumer** — the panic it
+attributed to the second-fatal path was actually the INI diagnostic (the
+`php_flag report_memleaks off` deprecation), which fires in `apply_config()`
+*before* `php_request_startup()`.
+
+This is exactly what the advisory states: the stale value is consumed "before
+normal request initialization resets it".
+
+### 7.2 The only consumer is pre-startup and always panics
+
+The sole consumer that runs before `init_executor()` is the INI diagnostic
+(`php_flag report_memleaks off`, in `apply_config()`). At that point
+`zend_mm_shutdown(full=0)` from the previous request has already zeroed every
+`chunk->map[]` entry, so the re-free is misclassified as a large run and hits
+`ZEND_MM_CHECK(page_offset % PAGE_SIZE == 0)` in `zend_mm_free_heap`
+(`Zend/zend_alloc.c:1539`) → `zend_mm_panic`.
+
+Measured panic pointer (2-frame `producer.php`): `EFREE_MAP0 ptr=0x...79140
+page=121 slot=5` — the **args array arData** (128B, bin 11), *not* `S` (the
+`"X"*32` arg string at page ~131) as the handover assumed.
+
+### 7.3 Measured backtrace layout (2-frame producer.php, stable across rebuilds in page terms)
+
+```
+H        (56B, bin 6)   page 3    0x...3150
+frame[0] (56B, bin 6)   page 3    0x...31c0   arData (128B, bin 11) page 4
+args[0]  (56B, bin 6)   page 3    0x...31f8   arData (128B, bin 11) page 121
+D        (128B, bin 11) page 121  0x...791e8   (nSize=8, not 64*16)
+S        (56B, bin 6)   page ~131  ("X"*32)
+```
+
+(For the 40-frame `fatal.php` producer, `D` is 64*16=1024B → bin 23.)
+
+### 7.4 Heap protection is ON
+
+`ZEND_MM_HEAP_PROTECTION` defaults to 1 (`Zend/zend_alloc.c:149`, no configure
+switch). Free slots carry an XOR-shadowed `next` pointer keyed by the per-worker
+random `heap->shadow_key` (re-randomized in the child via
+`zend_mm_refresh_key_child`), verified on every allocation. This kills the
+"free-list cycle" double-free idea (`memory-layout.md` §5.1/§5.2); a *single*
+free + *single* realloc of the same slot remains shadow-safe.
+
+### 7.5 Consumer startup re-runs page 3 as bin 16, not bin 6
+
+The handover assumed `H`'s low page would be "reallocated as symbol_table
+(56B)". Measured: the consumer's startup allocates bin 3→page1, bin 6→page2,
+bin 16 (320B, 5 pages)→pages 3-7, ... So page 3 (where `H` lives) becomes a
+bin-16 run, not bin 6. (Irrelevant now — the pre-startup consumer never
+re-runs any page.)
+
+### 7.6 Consequence for the plan
+
+The second-fatal path (H1/H2) is closed. Re-plan around a pre-startup consumer
+and/or the CVE-2026-109618 OOM `pDestructor` primitive (the original
+`exploit-plan.md` "Primitive A = primary, Primitive B = leak" split).
+
+## 8. Pivot to OOM pDestructor (CVE-2026-109618) — confirmed reachable
+
+Given the second-fatal consumer is impossible (§7), the exploit pivots to the
+OOM `pDestructor` primitive (original `exploit-plan.md` "Primitive A"). Gdb
+verification of the corrupting allocation is now done.
+
+### 8.1 The fix (diff 8.5.11 -> 8.5.12)
+
+Every hash-table allocation in `Zend/zend_hash.c` is converted from
+`emalloc`/`pemalloc`/`perealloc2` (which `zend_bailout()` on OOM) to
+`femalloc`/`fpemalloc`/`fperealloc2` (fallible, return NULL + `HASH_FALLIBLE`
+flag). The vulnerable pattern is the bailout that unwinds with the table
+half-initialised.
+
+### 8.2 The corrupting allocation (8.5.11)
+
+`_zend_hash_str_add_or_update_i()` `add_to_hash` (Zend/zend_hash.c:960):
+
+```c
+idx = ht->nNumUsed++;                                    // (1) bumped
+ht->nNumOfElements++;                                    // (2) bumped
+p = ht->arData + idx;
+p->key = key = zend_string_init(str, len, ...);          // (3) OOM -> bailout
+```
+
+The key copy at (3) is the first large allocation on the nested-name path, so
+the OOM lands exactly here, leaving `ht->arData[idx]` (key/h/val) unwritten.
+
+### 8.3 Confirmed trigger (gdb-verified)
+
+`strat_bracket_key(nvars, keylen)`: urlencoded `a[<large-key>][c]=v`.
+
+`php_register_variable_ex()` adds the LARGE *intermediate* key to `$_POST["a"]`
+via `zend_symtable_str_update_ind()` -> `_zend_hash_str_add_or_update_i()`
+(str variant -> key copy, **no interning**). The leaf `[c]` goes through
+`php_register_variable_quick()` (which interns), so only the intermediate level
+reaches the raw str variant. OOM backtrace:
+
+```
+zend_mm_safe_error <- ... <- zend_string_alloc <- zend_string_init
+  <- _zend_hash_str_add_or_update_i <- zend_hash_str_update_ind
+  <- zend_symtable_str_update_ind <- php_register_variable_ex
+```
+
+### 8.4 The corrupted table and walk
+
+Corrupted table is `$_POST["a"]` (nUsed = fields-until-OOM). Shutdown's
+`zend_array_destroy()` does **not** call `zend_hash_destroy()` for the common
+case (`pDestructor == ZVAL_PTR_DTOR`); it inlines:
+
+```c
+do { i_zval_ptr_dtor(&p->val); if (p->key) zend_string_release_ex(p->key); } while (++p != end);
+```
+
+The unwritten bucket's `val` is currently garbage (`IS_ARRAY` pointing at a
+live array, i.e. a stale `array_init` result) — non-UNDEF, so it IS walked.
+
+### 8.5 Grooming target (remaining)
+
+Make the unwritten bucket's `val` (16 bytes at `arData + (nUsed-1)*32`) an
+`IS_OBJECT` zval pointing at the fake object/handlers/ROP from `rop.py`, so
+`i_zval_ptr_dtor` -> `zend_objects_store_del` -> `free_obj` -> `system`.
+The bucket sits in the new (garbage) portion of the arData realloc, so the
+groom must control the freed memory the realloc reuses.
+
+### 8.6 Grooming status (gdb-measured)
+
+The `$_POST["a"]` arData grows 8->16->32->64 buckets via
+`zend_hash_do_resize`, which for the final 32->64 step does
+`perealloc2` -> `zend_mm_realloc_heap`: `zend_mm_alloc_small(bin 28)` +
+`memcpy(old)` + `zend_mm_free_small(old, bin 24)`.
+
+Measured facts:
+- 64-bucket arData = `HT_SIZE_EX(64)` = 64*32 + 128*4 = **2560 bytes = bin 28**
+  (`HT_SIZE_TO_MASK(n)=-(2n)`, so the hash array is `2n*4`).
+- The bin-28 free list is **empty** at the resize, so it allocates a fresh
+  5-page run from `chunk->free_tail` (not from a freed bin slot). The unwritten
+  bucket (index 45) lands in the stale content of those free_tail pages.
+- That stale content is a **deterministic previous arData bucket** (measured
+  `val=IS_ARRAY @ 0x...f540, h=0xf7302a9e38b2b70e` every run) — i.e. a pointer
+  to a live `tmp` array. So `i_zval_ptr_dtor` already double-frees a live array,
+  but it does not crash (shadow-key check only fires on the next alloc).
+- A pad value (small bin-28 or large page-aligned) does **not** land in the
+  arData tail: `add_post_var` does `estrndup(value)` -> `ZVAL_STRINGL_FAST`
+  (copy) -> `efree(estrndup)`, so the freed `A` block sits *before* the live
+  copy `B` and its pages go to `free_map`, never the contiguous `free_tail`.
+
+Remaining grooming problem: place attacker-controlled bytes on the
+`free_tail` pages the bin-28 resize consumes (page-level grooming of
+`free_map`/`free_tail`), not bin free-list grooming.
+
+### 8.7 Stale-alias primitive (corrected) — the actual double-free target
+
+Re-examined with per-address `zend_array_destroy` logging. The unwritten bucket's
+`val` is a **stale pointer that aliases the field-46 `tmp` array** (which was
+leaked by the OOM'd insert, since the insert aborted before `ZVAL_COPY_VALUE`).
+At shutdown the walk does `i_zval_ptr_dtor(stale IS_ARRAY)` ->
+`zend_array_destroy(tmp)`, freeing the *leaked* tmp once. There is no
+second free of a live array in the default layout (the stale pointer's value
+`0x…284540` lands exactly on the leaked tmp, verified: that address appears
+exactly once in the destroy trace).
+
+So the primitive is a **stale-pointer free**, not a literal double-free. Its
+value: the unwritten bucket's `val` is *attacker-influenced via the arData
+tail*, and when it points at a **fake `zend_array`** (controlled `pDestructor`),
+`zend_array_destroy` takes the `pDestructor != ZVAL_PTR_DTOR` branch and does
+`ht->pDestructor(&p->val)` — the arbitrary indirect call. That is the same
+object-hijack target as `rop.py`, reached through the OOM bucket instead of the
+backtrace. The "double-free" framing is therefore the *wrong* lens: the real
+task is exactly the bin-28 slot placement of §8.6.

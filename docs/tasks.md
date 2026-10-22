@@ -33,7 +33,7 @@ Legend:
 | T-03 | — | Shared base `container/base/Containerfile` | done | n/a | n/a | parameterized (vuln 8.5.11 / patched 8.5.12) |
 | T-04 | — | Build base images; verify PHP + mod_php | done | n/a | n/a | `php -v`=8.5.11/8.5.12 |
 | T-05 | — | Restructure into per-case containers + exploits | done | n/a | n/a | 3 standalone cases |
-| T-06 | `cve-2026-109618-oom` | OOM corruption trigger | done | prim | - | OOM reaches the corrupting allocation (`zend_string_init` after `nNumUsed++`); crash needs bucket grooming |
+| T-06 | `cve-2026-109618-oom` | OOM corruption trigger | done | prim | - | CONFIRMED via `a[<large>][c]=v` (bracket-key): OOM lands on the key-copy `zend_string_init` in `_zend_hash_str_add_or_update_i` after `nNumUsed++`, leaving `$_POST["a"]`'s last bucket unwritten; walked by `zend_array_destroy`→`i_zval_ptr_dtor`. Next: groom the unwritten bucket's `val` to IS_OBJECT |
 | T-07 | `cve-2026-109619-stale-state` | Confirm stale-backtrace UAF crash | done | work | work | `run.sh uaf` -> `zend_mm_heap corrupted` -> SIGABRT |
 | T-08 | `cve-2026-109619-stale-state` | Heap groom: control freed `zend_array` | - | - | - | shared technique for both CVEs; needs allocator layout under gdb |
 | T-09 | `cve-2026-109619-stale-state` | Info-leak: fake `zend_string` read | - | - | - | scaffold in `leak.py` |
